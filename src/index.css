@@ -1,0 +1,47 @@
+@import 'tailwindcss';
+
+/*
+  Cores do Htech Live Dash — viram classes do Tailwind automaticamente:
+  bg-primary, text-primary-900, border-gray-200, bg-danger, text-danger-700 ...
+*/
+@theme {
+  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-primary: #0492f7;
+  --color-primary-50: #f3f9ff;
+  --color-primary-100: #e6f4fe;
+  --color-primary-200: #b9dffd;
+  --color-primary-700: #0369b8;
+  --color-primary-900: #0b3a66;
+
+  --color-gray: #9ca3af;
+  --color-gray-100: #f3f4f6;
+  --color-gray-200: #e5e7eb;
+
+  --color-ink: #0b2540;
+
+  --color-danger: #dc2626;
+  --color-danger-50: #fef2f2;
+  --color-danger-100: #fee2e2;
+  --color-danger-200: #fecaca;
+  --color-danger-700: #b91c1c;
+
+  /* altura padrão de todos os cards (o excesso rola dentro do card) */
+  --spacing-block: 380px;
+}
+
+@layer base {
+  body {
+    @apply min-h-screen bg-white font-sans text-ink;
+  }
+}
+
+/* barra de rolagem fina dentro dos cards */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gray-200) transparent;
+}
+.scroll-thin-danger {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-danger-200) transparent;
+}
