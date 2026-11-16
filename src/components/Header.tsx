@@ -95,7 +95,7 @@ export function Header({ snapshot, error, now, department, onDepartmentChange }:
 
       {error && (
         <div className="rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 text-sm" role="alert">
-          Não foi possível atualizar agora — mostrando os dados de {updated}. Detalhe: {error}
+          Erro ao atualizar — mostrando os dados de {updated}.
         </div>
       )}
     </header>

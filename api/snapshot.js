@@ -27,7 +27,8 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store'); // nunca guardar em cache público: os dados são do cliente
 
   if (!process.env.HTECH_TOKEN) {
-    return res.status(500).json({ error: 'HTECH_TOKEN não configurado nas variáveis de ambiente do projeto.' });
+    console.error('[snapshot] HTECH_TOKEN não configurado nas variáveis de ambiente do projeto.');
+    return res.status(500).json({ error: 'Erro' });
   }
 
   try {
@@ -38,6 +39,8 @@ export default async function handler(req, res) {
     const dept = typeof req.query.department === 'string' ? req.query.department : '';
     return res.status(200).json(snapshotFor(raw, dept));
   } catch (err) {
-    return res.status(502).json({ error: String(err?.message ?? err) });
+    // o detalhe fica só nos logs da Vercel (Project → Logs); a tela recebe um erro genérico
+    console.error('[snapshot]', err);
+    return res.status(502).json({ error: 'Erro' });
   }
 }

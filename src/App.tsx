@@ -13,7 +13,7 @@ export default function App() {
   if (!snapshot) {
     return (
       <div className="p-20 text-center text-gray">
-        {status === 'error' ? `Não foi possível carregar os dados. Tentando de novo… (${error})` : 'Carregando os dados de hoje…'}
+        {status === 'error' ? 'Erro ao carregar os dados.' : 'Carregando os dados de hoje…'}
       </div>
     )
   }

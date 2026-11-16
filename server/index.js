@@ -50,7 +50,7 @@ const app = express();
 app.get('/api/snapshot', async (req, res) => {
   res.set('Cache-Control', 'no-store');
   if (!raw) await refresh();
-  if (!raw || lastError) return res.status(502).json({ error: lastError ?? 'Sem dados' });
+  if (!raw || lastError) return res.status(502).json({ error: 'Erro' }); // detalhe só no terminal
   const auth = await authorize(credentialsFrom(req.headers), async () => raw.agents);
   if (!auth.ok) return res.status(auth.status).json({ error: auth.error, reason: auth.reason });
   const dept = typeof req.query.department === 'string' ? req.query.department : '';
