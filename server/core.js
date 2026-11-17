@@ -58,7 +58,7 @@ const isAdmin = (agent) => agent.profile === 'Admin' || agent.isOwner === true;
 
 /**
  * Quem pode ver o painel: só quem abre pelo botão da plataforma, com a URL
- * ?conta=<Id da conta>&usuario=<Id do usuário>. Libera se a conta é a mesma do token
+ * /<Id da conta>/<Id do usuário> (o navegador envia os dois IDs nos cabeçalhos). Libera se a conta é a mesma do token
  * e o usuário é um administrador ativo dela. Qualquer outro acesso é bloqueado.
  *
  * `getAgents` devolve a lista de usuários da API. Retorna { ok: true } ou { ok: false, status, reason, error }.

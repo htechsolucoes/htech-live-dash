@@ -31,7 +31,7 @@ async function refresh() {
         const admin = r.agents.find((a) => a.profile === 'Admin' || a.isOwner);
         const companyId = r.agents.find((a) => a.companyId)?.companyId;
         if (admin && companyId) {
-          console.log(`Para testar: http://localhost:5173/?conta=${companyId}&usuario=${admin.userId}  (admin: ${admin.name})`);
+          console.log(`Para testar: http://localhost:5173/${companyId}/${admin.userId}  (admin: ${admin.name})`);
         }
       }
     })

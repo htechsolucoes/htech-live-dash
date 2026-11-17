@@ -6,10 +6,22 @@ const POLL_MS = 15_000
 
 export type Status = 'loading' | 'ok' | 'denied' | 'error'
 
-/** IDs que a plataforma coloca no link do botão: ?conta=<Id da conta>&usuario=<Id do usuário> */
+/**
+ * IDs que a plataforma coloca no link do botão, no caminho da URL:
+ *   https://<painel>.vercel.app/<Id da conta>/<Id do usuário>
+ * Qualquer outro formato (sem os dois IDs, ou com partes a mais) chega vazio e o servidor bloqueia.
+ */
 function readPlatformParams() {
-  const q = new URLSearchParams(window.location.search)
-  return { conta: q.get('conta') ?? '', usuario: q.get('usuario') ?? '' }
+  const parts = window.location.pathname.split('/').filter(Boolean)
+  if (parts.length !== 2) return { conta: '', usuario: '' }
+  const decode = (v: string) => {
+    try {
+      return decodeURIComponent(v)
+    } catch {
+      return ''
+    }
+  }
+  return { conta: decode(parts[0]!), usuario: decode(parts[1]!) }
 }
 
 /**

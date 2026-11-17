@@ -34,11 +34,13 @@ O mesmo código serve para todos os clientes. Cada cliente é **um projeto na Ve
 
 ### Botão na plataforma
 
-Na tela de configuração do botão/menu da plataforma, cadastre a URL do painel do cliente com os dois parâmetros, usando os botões **Id da conta** e **Id do usuário** para inserir os valores:
+Na tela de configuração do botão/menu da plataforma, cadastre a URL do painel do cliente com os dois IDs no caminho, usando os botões **Id da conta** e **Id do usuário** para inserir os valores:
 
 ```
-https://<nome-do-projeto>.vercel.app/?conta=<Id da conta>&usuario=<Id do usuário>
+https://<nome-do-projeto>.vercel.app/<Id da conta>/<Id do usuário>
 ```
+
+O filtro de equipe vai depois, como `?equipe=<id>` (o próprio painel coloca ao escolher a equipe).
 
 O servidor libera o painel quando:
 1. a conta do link é a mesma do `HTECH_TOKEN` (comparada com o `companyId` dos usuários na API); e
@@ -71,7 +73,7 @@ npm run dev               # servidor (3001) + Vite (5173)
 ```
 
 Como o painel só abre com conta + administrador na URL, o servidor mostra no terminal um link pronto para testar:
-`Para testar: http://localhost:5173/?conta=...&usuario=...`
+`Para testar: http://localhost:5173/<Id da conta>/<Id do usuário>`
 
 > Alterou o `.env`? Pare (Ctrl+C) e rode de novo.
 
@@ -83,7 +85,7 @@ Como o painel só abre com conta + administrador na URL, o servidor mostra no te
 
 ```
 Navegador (React)  —— a cada 15 s: GET /api/snapshot ——→  backend  —— Bearer HTECH_TOKEN ——→  api.wts.chat
-                       cabeçalhos x-dash-conta + x-dash-usuario (IDs vindos do link da plataforma)
+                       cabeçalhos x-dash-conta + x-dash-usuario (IDs do caminho /<conta>/<usuario>)
 ```
 
 - **O token nunca vai para o navegador.** Quem chama a API é o backend:
@@ -110,6 +112,7 @@ Navegador (React)  —— a cada 15 s: GET /api/snapshot ——→  backend  —
 ## Estrutura
 
 ```
+vercel.json    faz a Vercel abrir o painel em qualquer caminho (/<conta>/<usuario>), menos /api
 api/
   snapshot.js  função da Vercel (regras de acesso + cache + resposta)
 server/
