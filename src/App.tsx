@@ -12,7 +12,7 @@ export default function App() {
 
   if (!snapshot) {
     return (
-      <div className="p-20 text-center text-gray">
+      <div className="grid min-h-screen place-items-center px-4 text-center text-gray">
         {status === 'error' ? 'Erro ao carregar os dados.' : 'Carregando os dados de hoje…'}
       </div>
     )
