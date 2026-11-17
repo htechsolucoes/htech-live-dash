@@ -97,8 +97,7 @@ export function buildSnapshot({ sessions, agents, dayStart, tz, now = new Date()
       avgServiceSec: avg(_service),
       avgWaitSec: avg(_wait),
     }))
-    // só aparece quem tem conversa aberta ou atendeu hoje
-    .filter((r) => r.active || r.completed || r.received)
+    // todos os usuários aparecem, mesmo sem nenhuma conversa hoje (card zerado)
     .sort((a, b) => b.completed - a.completed || b.active - a.active || a.name.localeCompare(b.name));
 
   // ---------- por hora ----------

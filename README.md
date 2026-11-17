@@ -118,7 +118,7 @@ Navegador (React)  —— a cada 15 s: GET /api/snapshot ——→  backend  —
 | Em atendimento | `status = IN_PROGRESS` |
 | Tempo médio de atendimento | média de `timeService` das concluídas hoje; se vier vazio, `endAt − firstResponseAt` |
 | Tempo médio de espera | média de `timeWait` das conversas de hoje já respondidas; se vier vazio, `firstResponseAt − startAt` |
-| Cards por atendente | agrupa por `userId` da conversa; aparece quem tem conversa aberta ou atendeu hoje |
+| Cards por atendente | um card para cada usuário da conta (ou da equipe), com ou sem conversa hoje; as conversas são agrupadas pelo `userId` |
 | Filtro de equipe | conversas com `departmentId` da equipe + atendentes cadastrados nela |
 | Filtro de usuário | conversas com `userId` do usuário; "Na fila" e o card da fila continuam vindo da equipe |
 

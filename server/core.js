@@ -68,26 +68,6 @@ export function snapshotFor(raw, dept = '', user = '') {
     now: raw.now,
   });
   const queue = team.live.filter((s) => s.status === 'PENDING');
-  // usuário escolhido sem nenhum atendimento hoje: mostra o card dele vazio, com números zerados
-  if (mine.agents.length === 0) {
-    const a = agents.find((x) => x.userId === user);
-    if (a) {
-      mine.agents = [
-        {
-          userId: a.userId,
-          name: agentName(a),
-          pictureUrl: a.pictureUrl ?? null,
-          profile: a.profile ?? null,
-          active: 0,
-          completed: 0,
-          received: 0,
-          avgServiceSec: null,
-          avgWaitSec: null,
-          lastActivityAt: null,
-        },
-      ];
-    }
-  }
   return {
     ...mine,
     ...base,
