@@ -53,13 +53,46 @@ const safeEqual = (x, y) => {
   return a.length === b.length && timingSafeEqual(a, b);
 };
 
-/** Usuário que pode ver o painel: administrador ou dono da conta. */
-const isAdmin = (agent) => agent.profile === 'Admin' || agent.isOwner === true;
+/**
+ * Perfis da plataforma, do mais alto para o mais baixo. Quem tem um perfil acessa tudo
+ * que os perfis abaixo dele acessam.
+ */
+const PERFIS = ['ADMIN', 'AGENT', 'RESTRICTED_AGENT'];
+const nivel = (perfil) => PERFIS.indexOf(String(perfil ?? '').trim().toUpperCase()); // -1 = desconhecido
+
+/**
+ * PERFIL_MINIMO: o perfil mais baixo que ainda pode ver o painel.
+ *   ADMIN            → só administradores (padrão)
+ *   AGENT            → administradores e atendentes
+ *   RESTRICTED_AGENT → todos
+ * Valor vazio ou inválido = ADMIN (o mais restrito).
+ */
+export function perfilMinimo() {
+  const valor = String(process.env.PERFIL_MINIMO ?? '').trim().toUpperCase();
+  if (!valor) return 'ADMIN';
+  if (!PERFIS.includes(valor)) {
+    console.error(`[acesso] PERFIL_MINIMO="${process.env.PERFIL_MINIMO}" não é válido (use ADMIN, AGENT ou RESTRICTED_AGENT). Usando ADMIN.`);
+    return 'ADMIN';
+  }
+  return valor;
+}
+
+/** O perfil do usuário alcança o PERFIL_MINIMO? (perfil desconhecido nunca passa) */
+export function perfilPermitido(perfil, minimo = perfilMinimo()) {
+  const n = nivel(perfil);
+  return n !== -1 && n <= PERFIS.indexOf(minimo);
+}
+
+const MENSAGEM_PERFIL = {
+  ADMIN: 'Painel disponível apenas para administradores.',
+  AGENT: 'Painel disponível apenas para administradores e atendentes.',
+  RESTRICTED_AGENT: 'Seu perfil não tem acesso a este painel.',
+};
 
 /**
  * Quem pode ver o painel: só quem abre pelo botão da plataforma, com a URL
  * /<Id da conta>/<Id do usuário> (o navegador envia os dois IDs nos cabeçalhos). Libera se a conta é a mesma do token
- * e o usuário é um administrador ativo dela. Qualquer outro acesso é bloqueado.
+ * e o perfil do usuário alcança o PERFIL_MINIMO. Qualquer outro acesso é bloqueado.
  *
  * `getAgents` devolve a lista de usuários da API. Retorna { ok: true } ou { ok: false, status, reason, error }.
  */
@@ -74,7 +107,8 @@ export async function authorize({ conta, usuario }, getAgents) {
   }
   const user = agents.find((a) => a.userId === usuario);
   if (!user) return { ok: false, status: 403, reason: 'usuario', error: 'Usuário não encontrado nesta conta.' };
-  if (!isAdmin(user)) return { ok: false, status: 403, reason: 'perfil', error: 'Painel disponível apenas para administradores.' };
+  const minimo = perfilMinimo();
+  if (!perfilPermitido(user.profile, minimo)) return { ok: false, status: 403, reason: 'perfil', error: MENSAGEM_PERFIL[minimo] };
   return { ok: true };
 }
 

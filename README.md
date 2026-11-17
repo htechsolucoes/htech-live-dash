@@ -7,7 +7,7 @@ Painel ao vivo do atendimento do dia (React + Vite + Tailwind), em tema claro (b
 - **Um card por atendente:** ✓ concluídos hoje e 💬 em andamento agora, com as conversas abertas e um aviso quando o cliente está aguardando resposta.
 - Todos os cards têm a **mesma altura** (`--spacing-block` no `src/index.css`). Se passar do tamanho, o card ganha rolagem interna.
 - **Filtro por equipe:** fica salvo no endereço (`?equipe=<id>`), então dá para deixar uma TV fixa numa equipe.
-- **Acesso só pela plataforma:** o painel abre apenas pelo botão da plataforma, para **administradores** da conta (veja "Botão na plataforma" abaixo). Aberto de qualquer outro jeito, mostra "Acesso restrito".
+- **Acesso só pela plataforma:** o painel abre apenas pelo botão da plataforma, para os perfis definidos em `PERFIL_MINIMO` (padrão: só administradores). Veja "Botão na plataforma" abaixo. Aberto de qualquer outro jeito, mostra "Acesso restrito".
 
 Só entram dados de **hoje** (a partir da meia-noite no fuso configurado), menos as conversas abertas, que aparecem mesmo que tenham começado ontem. A tela busca dados novos a cada **15 segundos**, e os cronômetros andam a cada segundo.
 
@@ -26,6 +26,7 @@ O mesmo código serve para todos os clientes. Cada cliente é **um projeto na Ve
    | Nome | Valor |
    |---|---|
    | `HTECH_TOKEN` | token do cliente |
+   | `PERFIL_MINIMO` | quem pode ver o painel: `ADMIN` (padrão), `AGENT` ou `RESTRICTED_AGENT` — veja abaixo |
    | `TZ_DASH` | só se o cliente não estiver no horário de Brasília (ex.: `America/Manaus`) |
 
 4. Clique em **Deploy**. Pronto: o painel fica em `https://<nome-do-projeto>.vercel.app`.
@@ -43,10 +44,18 @@ https://<nome-do-projeto>.vercel.app/<Id da conta>/<Id do usuário>
 O filtro de equipe vai depois, como `?equipe=<id>` (o próprio painel coloca ao escolher a equipe).
 
 O servidor libera o painel quando:
-1. a conta do link é a mesma do `HTECH_TOKEN` (comparada com o `companyId` dos usuários na API); e
-2. o usuário do link existe nessa conta e é **administrador** (perfil `Admin` ou dono da conta).
+1. a conta do link é a mesma do `HTECH_TOKEN` (comparada com o `companyId` dos usuários em `GET /core/v1/agent`); e
+2. o usuário do link existe nessa conta e o **perfil** dele (`profile`) alcança o `PERFIL_MINIMO`:
 
-Qualquer outro caso mostra "Acesso restrito" com o motivo: aberto fora da plataforma, atendente comum, usuário removido, link de outra conta ou link incompleto. Se um usuário deixa de ser administrador ou é removido, o acesso dele acaba na próxima atualização.
+| `PERFIL_MINIMO` | ADMIN | AGENT | RESTRICTED_AGENT |
+|---|---|---|---|
+| `ADMIN` (padrão) | ✅ | 🚫 | 🚫 |
+| `AGENT` | ✅ | ✅ | 🚫 |
+| `RESTRICTED_AGENT` | ✅ | ✅ | ✅ |
+
+Vazio ou com valor inválido, vale `ADMIN`. Um perfil que não seja um desses três nunca passa.
+
+Qualquer outro caso mostra "Acesso restrito" com o motivo: aberto fora da plataforma, perfil sem acesso, usuário removido, link de outra conta ou link incompleto. Se o perfil de alguém muda ou a pessoa é removida, vale na próxima atualização (até ~15 s).
 
 > ⚠️ Esses IDs não são uma senha: quem tiver o link completo de um administrador consegue abrir o painel. Por isso, não compartilhe esse link fora da plataforma.
 

@@ -4,7 +4,7 @@ import 'dotenv/config';
 import express from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { authorize, collect, credentialsFrom, snapshotFor, TZ } from './core.js';
+import { authorize, collect, credentialsFrom, perfilMinimo, perfilPermitido, snapshotFor, TZ } from './core.js';
 
 const PORT = Number(process.env.PORT ?? 3001);
 const REFRESH_MS = Number(process.env.REFRESH_SECONDS ?? 15) * 1000;
@@ -28,10 +28,12 @@ async function refresh() {
       if (!printedLink) {
         // Link pronto para abrir no seu computador (o painel só abre com conta + admin na URL)
         printedLink = true;
-        const admin = r.agents.find((a) => a.profile === 'Admin' || a.isOwner);
+        const user = r.agents.find((a) => perfilPermitido(a.profile));
         const companyId = r.agents.find((a) => a.companyId)?.companyId;
-        if (admin && companyId) {
-          console.log(`Para testar: http://localhost:5173/${companyId}/${admin.userId}  (admin: ${admin.name})`);
+        if (user && companyId) {
+          console.log(`Para testar: http://localhost:5173/${companyId}/${user.userId}  (${user.name}, ${user.profile})`);
+        } else {
+          console.log(`Nenhum usuário com perfil ${perfilMinimo()} (ou acima) encontrado na conta.`);
         }
       }
     })
@@ -63,7 +65,7 @@ app.use(express.static(dist));
 app.get(/^(?!\/api).*/, (_req, res, next) => res.sendFile(path.join(dist, 'index.html'), (e) => e && next()));
 
 app.listen(PORT, () => {
-  console.log(`Htech Live Dash em http://localhost:${PORT} (fuso ${TZ}, atualiza a cada ${REFRESH_MS / 1000}s)`);
+  console.log(`Htech Live Dash em http://localhost:${PORT} (fuso ${TZ}, atualiza a cada ${REFRESH_MS / 1000}s, perfil mínimo ${perfilMinimo()})`);
   refresh();
   setInterval(refresh, REFRESH_MS);
 });
