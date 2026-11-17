@@ -83,6 +83,19 @@ export function perfilPermitido(perfil, minimo = perfilMinimo()) {
   return n !== -1 && n <= PERFIS.indexOf(minimo);
 }
 
+/**
+ * Super admins (SUPER_ADMIN_IDS=id1,id2 nas variáveis de ambiente): entram em qualquer painel,
+ * mesmo sem estar na lista de usuários da API e sem depender do PERFIL_MINIMO.
+ * A conta do link continua tendo que ser a do token. Sem a variável, não há super admin.
+ */
+function isSuperAdmin(userId) {
+  return String(process.env.SUPER_ADMIN_IDS ?? '')
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean)
+    .some((id) => safeEqual(userId, id));
+}
+
 const MENSAGEM_PERFIL = {
   ADMIN: 'Painel disponível apenas para administradores.',
   AGENT: 'Painel disponível apenas para administradores e atendentes.',
@@ -105,6 +118,7 @@ export async function authorize({ conta, usuario }, getAgents) {
   if (!companyId || !safeEqual(conta, companyId)) {
     return { ok: false, status: 403, reason: 'conta', error: 'Este painel não pertence à conta informada no link.' };
   }
+  if (isSuperAdmin(usuario)) return { ok: true };
   const user = agents.find((a) => a.userId === usuario);
   if (!user) return { ok: false, status: 403, reason: 'usuario', error: 'Usuário não encontrado nesta conta.' };
   const minimo = perfilMinimo();

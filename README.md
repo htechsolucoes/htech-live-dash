@@ -27,6 +27,7 @@ O mesmo código serve para todos os clientes. Cada cliente é **um projeto na Ve
    |---|---|
    | `HTECH_TOKEN` | token do cliente |
    | `PERFIL_MINIMO` | quem pode ver o painel: `ADMIN` (padrão), `AGENT` ou `RESTRICTED_AGENT` — veja abaixo |
+   | `SUPER_ADMIN_IDS` | opcional: IDs com acesso total (super admin), separados por vírgula — marque como **Sensitive** |
    | `TZ_DASH` | só se o cliente não estiver no horário de Brasília (ex.: `America/Manaus`) |
 
 4. Clique em **Deploy**. Pronto: o painel fica em `https://<nome-do-projeto>.vercel.app`.
@@ -54,6 +55,8 @@ O servidor libera o painel quando:
 | `RESTRICTED_AGENT` | ✅ | ✅ | ✅ |
 
 Vazio ou com valor inválido, vale `ADMIN`. Um perfil que não seja um desses três nunca passa.
+
+**Super admin:** os IDs de usuário em `SUPER_ADMIN_IDS` (separados por vírgula) têm acesso a qualquer painel, mesmo sem aparecer na lista de usuários da API e independente do `PERFIL_MINIMO`. A conta do link continua tendo que ser a do token. Esses IDs ficam **só nas variáveis da Vercel**, nunca no código: trate como senha e marque a variável como **Sensitive**.
 
 Qualquer outro caso mostra "Acesso restrito" com o motivo: aberto fora da plataforma, perfil sem acesso, usuário removido, link de outra conta ou link incompleto. Se o perfil de alguém muda ou a pessoa é removida, vale na próxima atualização (até ~15 s).
 
