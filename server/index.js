@@ -15,7 +15,9 @@ if (!process.env.HTECH_TOKEN) {
 }
 
 let raw = null;
+let rawAt = 0;
 let printedLink = false;
+const MIN_FORCE_MS = 5000; // botão "Atualizar": busca de novo no máximo a cada 5 s
 let lastError = null;
 let refreshing = null;
 
@@ -24,6 +26,7 @@ async function refresh() {
   refreshing = collect()
     .then((r) => {
       raw = r;
+      rawAt = Date.now();
       lastError = null;
       if (!printedLink) {
         // Link pronto para abrir no seu computador (o painel só abre com conta + admin na URL)
@@ -55,6 +58,10 @@ app.get('/api/snapshot', async (req, res) => {
   if (!raw || lastError) return res.status(502).json({ error: 'Erro' }); // detalhe só no terminal
   const auth = await authorize(credentialsFrom(req.headers), async () => raw.agents);
   if (!auth.ok) return res.status(auth.status).json({ error: auth.error, reason: auth.reason });
+  if (req.query.fresh === '1' && Date.now() - rawAt >= MIN_FORCE_MS) {
+    await refresh(); // botão "Atualizar"
+    if (lastError) return res.status(502).json({ error: 'Erro' });
+  }
   const dept = typeof req.query.department === 'string' ? req.query.department : '';
   const user = typeof req.query.user === 'string' ? req.query.user : '';
   res.json(snapshotFor(raw, dept, user));

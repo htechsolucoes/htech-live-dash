@@ -33,6 +33,9 @@ export function useSnapshot(department: string, user: string) {
   const [status, setStatus] = useState<Status>('loading')
   const [error, setError] = useState<string | null>(null)
   const [platform] = useState(readPlatformParams)
+  const [refreshing, setRefreshing] = useState(false)
+  const [nonce, setNonce] = useState(0) // muda a cada clique em "Atualizar"
+  const forceNext = useRef(false)
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => {
@@ -44,6 +47,8 @@ export function useSnapshot(department: string, user: string) {
         const q = new URLSearchParams()
         if (department) q.set('department', department)
         if (user) q.set('user', user)
+        if (forceNext.current) q.set('fresh', '1')
+        forceNext.current = false
         const query = q.toString()
         const url = query ? `/api/snapshot?${query}` : '/api/snapshot'
         const headers = { 'x-dash-conta': platform.conta, 'x-dash-usuario': platform.usuario }
@@ -64,7 +69,10 @@ export function useSnapshot(department: string, user: string) {
         setError(err instanceof Error ? err.message : String(err))
         setStatus((s) => (s === 'loading' ? 'error' : s))
       }
-      if (!cancelled) timer.current = setTimeout(load, POLL_MS)
+      if (!cancelled) {
+        setRefreshing(false)
+        timer.current = setTimeout(load, POLL_MS)
+      }
     }
 
     load()
@@ -73,9 +81,16 @@ export function useSnapshot(department: string, user: string) {
       controller.abort()
       clearTimeout(timer.current)
     }
-  }, [department, user, platform])
+  }, [department, user, platform, nonce])
 
-  return { snapshot, status, error }
+  /** Botão "Atualizar": busca agora (sem esperar os 15 s) e reinicia a contagem. */
+  const refresh = useCallback(() => {
+    forceNext.current = true
+    setRefreshing(true)
+    setNonce((n) => n + 1)
+  }, [])
+
+  return { snapshot, status, error, refresh, refreshing }
 }
 
 /** Relógio que atualiza a cada `ms` — usado nos cronômetros ao vivo. */

@@ -1,7 +1,7 @@
 import { fmtDuration, secondsSince, waitLevel } from '../format'
 import type { Snapshot } from '../types'
 import { FilterDropdown } from './FilterDropdown'
-import { FilterIcon, UserIcon } from './Icons'
+import { CalendarIcon, FilterIcon, RefreshIcon, UserIcon } from './Icons'
 
 interface Props {
   snapshot: Snapshot
@@ -12,6 +12,8 @@ interface Props {
   onDepartmentChange: (id: string) => void
   user: string
   onUserChange: (id: string) => void
+  onRefresh: () => void
+  refreshing: boolean
 }
 
 function Stat({ label, value, hint, alert }: { label: string; value: string | number; hint?: string; alert?: boolean }) {
@@ -29,7 +31,7 @@ function Stat({ label, value, hint, alert }: { label: string; value: string | nu
 }
 
 /** Barra superior: filtro de equipe + números gerais do dia. */
-export function Header({ snapshot, error, now, department, onDepartmentChange, user, onUserChange }: Props) {
+export function Header({ snapshot, error, now, department, onDepartmentChange, user, onUserChange, onRefresh, refreshing }: Props) {
   const t = snapshot.totals
   const hasDepartments = snapshot.departments.length > 0
   const oldestWait = secondsSince(t.oldestQueuedAt, now)
@@ -39,9 +41,37 @@ export function Header({ snapshot, error, now, department, onDepartmentChange, u
     minute: '2-digit',
     second: '2-digit',
   }).format(new Date(snapshot.generatedAt))
+  const today = new Intl.DateTimeFormat('pt-BR', { timeZone: snapshot.tz, weekday: 'long', day: 'numeric', month: 'long' }).format(now)
 
   return (
-    <header className="sticky top-0 z-10 flex flex-col gap-3 border-b border-gray-200 bg-white px-4 py-4 sm:px-7">
+    <header className="sticky top-0 z-10 flex flex-col gap-2.5 border-b border-gray-200 bg-white px-4 pt-3 pb-4 sm:px-7">
+      <div className="flex h-8 items-center justify-between gap-3">
+        <span className="flex min-w-0 items-center gap-2 text-[13px] text-primary-900">
+          <span className="text-primary">
+            <CalendarIcon size={16} />
+          </span>
+          <strong className="font-semibold">Hoje</strong>
+          <span className="text-gray" aria-hidden>
+            ·
+          </span>
+          <span className="truncate text-gray-500">{today}</span>
+        </span>
+        <span className="flex shrink-0 items-center gap-2.5">
+          <span className="hidden text-xs text-gray sm:inline" aria-live="polite">
+            Atualizado às {updated}
+          </span>
+          <button
+            type="button"
+            onClick={onRefresh}
+            disabled={refreshing}
+            className="inline-flex h-[30px] cursor-pointer items-center gap-1.5 rounded-lg border border-primary-200 bg-white px-3 text-[13px] font-semibold text-primary-700 hover:bg-primary-50 focus-visible:ring-2 focus-visible:ring-primary-100 focus-visible:outline-none disabled:cursor-default disabled:opacity-70"
+          >
+            <RefreshIcon size={15} className={refreshing ? 'animate-spin motion-reduce:animate-none' : ''} />
+            {refreshing ? 'Atualizando…' : 'Atualizar'}
+          </button>
+        </span>
+      </div>
+
       <div
         className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 2xl:grid-cols-8"
         aria-label="Números do dia"

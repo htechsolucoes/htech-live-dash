@@ -56,3 +56,21 @@ export const UserIcon = ({ size = 16, title }: P) => (
     <path d="M4 20.5c1.4-3.6 4.4-5.5 8-5.5s6.6 1.9 8 5.5" />
   </svg>
 )
+
+/** Calendário — barra de "Hoje" */
+export const CalendarIcon = ({ size = 16, title }: P) => (
+  <svg {...base(size, title)}>
+    <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
+    <path d="M3.5 10h17M8 3v4M16 3v4" />
+  </svg>
+)
+
+/** Setas circulares — atualizar */
+export const RefreshIcon = ({ size = 16, title, className }: P & { className?: string }) => (
+  <svg {...base(size, title)} className={className}>
+    <path d="M20 11.5A8 8 0 0 0 6.3 6.3L4 8.5" />
+    <path d="M4 4v4.5h4.5" />
+    <path d="M4 12.5a8 8 0 0 0 13.7 5.2l2.3-2.2" />
+    <path d="M20 20v-4.5h-4.5" />
+  </svg>
+)

@@ -9,6 +9,8 @@ Painel ao vivo do atendimento do dia (React + Vite + Tailwind), em tema claro (b
 - **Filtros por equipe e por usuário:** ficam salvos no endereço (`?equipe=<id>&atendente=<id>`), então sobrevivem a um recarregar. A lista de usuários mostra todos os usuários da conta (ou da equipe escolhida), com ou sem atendimento hoje. Com um usuário escolhido, os números e os cards mostram só as conversas dele, mas a fila de espera continua aparecendo (quem está na fila ainda não tem atendente). Trocar de equipe limpa o filtro de usuário.
 - **Acesso só pela plataforma:** o painel abre apenas pelo botão da plataforma, para os perfis definidos em `PERFIL_MINIMO` (padrão: só administradores). Veja "Botão na plataforma" abaixo. Aberto de qualquer outro jeito, mostra "Acesso restrito".
 
+No topo, uma barra mostra que os dados são de **hoje** (com a data), o horário da última atualização e um botão **Atualizar**. O botão busca dados novos na hora, sem esperar os 15 s; para não sobrecarregar a API, o servidor busca de novo no máximo a cada 5 s, mesmo com vários cliques.
+
 Só entram dados de **hoje** (a partir da meia-noite no fuso configurado), menos as conversas abertas, que aparecem mesmo que tenham começado ontem. A tela busca dados novos a cada **15 segundos**, e os cronômetros andam a cada segundo.
 
 ---

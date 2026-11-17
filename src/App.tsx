@@ -6,7 +6,7 @@ import { useNow, useSnapshot, useUrlParam } from './hooks'
 export default function App() {
   const [department, setDepartment] = useUrlParam('equipe')
   const [user, setUser] = useUrlParam('atendente')
-  const { snapshot, status, error } = useSnapshot(department, user)
+  const { snapshot, status, error, refresh, refreshing } = useSnapshot(department, user)
 
   // trocar de equipe limpa o filtro de usuário (a pessoa pode não ser da nova equipe)
   const changeDepartment = (id: string) => {
@@ -35,6 +35,8 @@ export default function App() {
         onDepartmentChange={changeDepartment}
         user={user}
         onUserChange={setUser}
+        onRefresh={refresh}
+        refreshing={refreshing}
       />
       <Board agents={snapshot.agents} live={snapshot.live} now={now} />
     </div>
