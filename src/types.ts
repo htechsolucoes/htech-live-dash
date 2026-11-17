@@ -49,10 +49,12 @@ export interface LiveSession {
   previewUrl: string | null
 }
 
-export interface Department {
+export interface Option {
   id: string
   name: string
 }
+
+export type Department = Option
 
 export interface Snapshot {
   generatedAt: string
@@ -60,6 +62,9 @@ export interface Snapshot {
   tz: string
   department: string | null
   departments: Department[]
+  user: string | null
+  /** opções do filtro de usuário (quem aparece no painel da equipe hoje) */
+  users: Option[]
   totals: Totals
   agents: AgentRow[]
   hourly: HourBucket[]

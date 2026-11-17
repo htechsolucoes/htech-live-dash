@@ -1,6 +1,7 @@
 import { fmtDuration, secondsSince, waitLevel } from '../format'
 import type { Snapshot } from '../types'
-import { DepartmentFilter } from './DepartmentFilter'
+import { FilterDropdown } from './FilterDropdown'
+import { FilterIcon, UserIcon } from './Icons'
 
 interface Props {
   snapshot: Snapshot
@@ -9,6 +10,8 @@ interface Props {
   now: number
   department: string
   onDepartmentChange: (id: string) => void
+  user: string
+  onUserChange: (id: string) => void
 }
 
 function Stat({ label, value, hint, alert }: { label: string; value: string | number; hint?: string; alert?: boolean }) {
@@ -26,7 +29,7 @@ function Stat({ label, value, hint, alert }: { label: string; value: string | nu
 }
 
 /** Barra superior: filtro de equipe + números gerais do dia. */
-export function Header({ snapshot, error, now, department, onDepartmentChange }: Props) {
+export function Header({ snapshot, error, now, department, onDepartmentChange, user, onUserChange }: Props) {
   const t = snapshot.totals
   const hasDepartments = snapshot.departments.length > 0
   const oldestWait = secondsSince(t.oldestQueuedAt, now)
@@ -40,12 +43,29 @@ export function Header({ snapshot, error, now, department, onDepartmentChange }:
   return (
     <header className="sticky top-0 z-10 flex flex-col gap-3 border-b border-gray-200 bg-white px-4 py-4 sm:px-7">
       <div
-        className={`grid grid-cols-2 gap-2.5 sm:grid-cols-4 ${hasDepartments ? 'xl:grid-cols-7' : 'xl:grid-cols-6'}`}
+        className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 2xl:grid-cols-8"
         aria-label="Números do dia"
       >
         {hasDepartments && (
-          <DepartmentFilter departments={snapshot.departments} value={department} onChange={onDepartmentChange} />
+          <FilterDropdown
+            label="Equipe"
+            icon={<FilterIcon size={14} />}
+            allLabel="Todas as equipes"
+            allShort="Todas"
+            options={snapshot.departments}
+            value={department}
+            onChange={onDepartmentChange}
+          />
         )}
+        <FilterDropdown
+          label="Usuário"
+          icon={<UserIcon size={14} />}
+          allLabel="Todos os usuários"
+          allShort="Todos"
+          options={snapshot.users}
+          value={user}
+          onChange={onUserChange}
+        />
         <Stat label="Recebidos" value={t.received} hint={t.inBot ? `${t.inBot} no chatbot` : undefined} />
         <Stat label="Concluídos" value={t.completed} />
         <Stat label="Em atendimento" value={t.inProgress} />

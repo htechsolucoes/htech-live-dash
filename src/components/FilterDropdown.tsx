@@ -1,22 +1,28 @@
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
-import type { Department } from '../types'
-import { FilterIcon } from './Icons'
+import { useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from 'react'
+import type { Option } from '../types'
 
 interface Props {
-  departments: Department[]
+  /** rótulo do card, ex.: "Equipe" */
+  label: string
+  icon: ReactNode
+  /** opção que limpa o filtro, ex.: "Todas as equipes" */
+  allLabel: string
+  /** texto mostrado no card quando não há filtro, ex.: "Todas" */
+  allShort: string
+  options: Option[]
   value: string
   onChange: (id: string) => void
 }
 
 /**
- * Filtro de equipe com cara de card (primeiro da linha de números) e lista própria, estilizada.
+ * Filtro com cara de card (na linha de números) e lista própria, estilizada.
  * Teclado: ↓/↑/Enter/Espaço abrem; ↓/↑/Home/End navegam; Enter/Espaço escolhem; Esc fecha.
  * Fecha também ao clicar fora.
  */
-export function DepartmentFilter({ departments, value, onChange }: Props) {
-  const options = [{ id: '', name: 'Todas as equipes' }, ...departments]
+export function FilterDropdown({ label, icon, allLabel, allShort, options: items, value, onChange }: Props) {
+  const options = [{ id: '', name: allLabel }, ...items]
   const selectedIndex = Math.max(0, options.findIndex((o) => o.id === value))
-  const current = value ? (departments.find((d) => d.id === value)?.name ?? 'Todas') : 'Todas'
+  const current = value ? (items.find((d) => d.id === value)?.name ?? allShort) : allShort
 
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(selectedIndex)
@@ -91,7 +97,7 @@ export function DepartmentFilter({ departments, value, onChange }: Props) {
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={open ? listId : undefined}
-        aria-label={`Filtrar por equipe: ${current}`}
+        aria-label={`Filtrar por ${label.toLowerCase()}: ${current}`}
         onClick={() => (open ? close() : openList())}
         onKeyDown={onButtonKeyDown}
         className={`flex w-full min-w-0 cursor-pointer flex-col gap-0.5 rounded-xl border-[1.5px] border-primary px-3.5 py-2.5 text-left outline-none hover:bg-primary-50 focus-visible:ring-2 focus-visible:ring-primary-100 ${
@@ -99,8 +105,8 @@ export function DepartmentFilter({ departments, value, onChange }: Props) {
         }`}
       >
         <span className="flex items-center gap-1.5 text-xs text-primary-700">
-          <FilterIcon size={14} />
-          Equipe
+          {icon}
+          {label}
         </span>
         <span className="flex items-center justify-between gap-2 text-xl leading-snug font-bold text-primary-900">
           <span className="truncate">{current}</span>
@@ -127,7 +133,7 @@ export function DepartmentFilter({ departments, value, onChange }: Props) {
           id={listId}
           role="listbox"
           tabIndex={-1}
-          aria-label="Equipes"
+          aria-label={label}
           aria-activedescendant={optionId(active)}
           onKeyDown={onListKeyDown}
           className="scroll-thin absolute top-full left-0 z-30 mt-2 max-h-72 w-full min-w-56 overflow-y-auto rounded-xl border border-primary-100 bg-white p-1.5 shadow-[0_10px_30px_rgba(11,37,64,0.16)] outline-none"
@@ -136,7 +142,7 @@ export function DepartmentFilter({ departments, value, onChange }: Props) {
             const selected = o.id === value
             return (
               <li
-                key={o.id || 'todas'}
+                key={o.id || 'todos'}
                 id={optionId(i)}
                 role="option"
                 aria-selected={selected}

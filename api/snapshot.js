@@ -1,4 +1,4 @@
-// Função da Vercel: GET /api/snapshot?department=<id>
+// Função da Vercel: GET /api/snapshot?department=<id>&user=<id>
 // Confere quem está acessando, busca os dados na API, calcula o painel e responde.
 // Guarda o resultado por alguns segundos na memória da função, para várias telas
 // abertas não multiplicarem as chamadas à API.
@@ -37,7 +37,8 @@ export default async function handler(req, res) {
 
     const raw = await getRaw();
     const dept = typeof req.query.department === 'string' ? req.query.department : '';
-    return res.status(200).json(snapshotFor(raw, dept));
+    const user = typeof req.query.user === 'string' ? req.query.user : '';
+    return res.status(200).json(snapshotFor(raw, dept, user));
   } catch (err) {
     // o detalhe fica só nos logs da Vercel (Project → Logs); a tela recebe um erro genérico
     console.error('[snapshot]', err);

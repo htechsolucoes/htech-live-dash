@@ -32,8 +32,13 @@ function departmentList(raw) {
   return [...map].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
 }
 
-/** Snapshot de uma equipe (ou de todas, com `dept` vazio) a partir dos dados crus. */
-export function snapshotFor(raw, dept = '') {
+/**
+ * Snapshot filtrado a partir dos dados crus.
+ *   dept: equipe ('' = todas)
+ *   user: usuário/atendente ('' = todos). Mostra só as conversas dele, mas a fila de espera
+ *         (que ainda não tem atendente) continua vindo do escopo da equipe.
+ */
+export function snapshotFor(raw, dept = '', user = '') {
   let { sessions, agents } = raw;
   if (dept) {
     sessions = sessions.filter((s) => s.departmentId === dept);
@@ -43,8 +48,34 @@ export function snapshotFor(raw, dept = '') {
     for (const d of raw.departments ?? []) if (d.id === dept) for (const a of d.agents ?? []) members.add(a.userId);
     agents = agents.filter((a) => members.has(a.userId));
   }
-  const snapshot = buildSnapshot({ sessions, agents, dayStart: raw.dayStart, tz: TZ, now: raw.now });
-  return { ...snapshot, department: dept || null, departments: departmentList(raw) };
+
+  const team = buildSnapshot({ sessions, agents, dayStart: raw.dayStart, tz: TZ, now: raw.now });
+  // opções do filtro de usuário: quem aparece no painel da equipe (conversa aberta ou movimento hoje)
+  const users = team.agents.map((a) => ({ id: a.userId, name: a.name })).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  const base = { department: dept || null, departments: departmentList(raw), user: user || null, users };
+
+  if (!user) return { ...team, ...base };
+
+  const mine = buildSnapshot({
+    sessions: sessions.filter((s) => s.userId === user),
+    agents: agents.filter((a) => a.userId === user),
+    dayStart: raw.dayStart,
+    tz: TZ,
+    now: raw.now,
+  });
+  const queue = team.live.filter((s) => s.status === 'PENDING');
+  return {
+    ...mine,
+    ...base,
+    totals: {
+      ...mine.totals,
+      // fila e chatbot não têm atendente: continuam vindo da equipe
+      inQueue: team.totals.inQueue,
+      oldestQueuedAt: team.totals.oldestQueuedAt,
+      inBot: team.totals.inBot,
+    },
+    live: [...queue, ...mine.live],
+  };
 }
 
 const safeEqual = (x, y) => {

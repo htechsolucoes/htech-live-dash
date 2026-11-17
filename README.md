@@ -6,7 +6,7 @@ Painel ao vivo do atendimento do dia (React + Vite + Tailwind), em tema claro (b
 - **Fila de espera (card vermelho):** quem ainda aguarda atendente, com cronômetro. O cartão fica mais vermelho conforme a espera aumenta (5 min / 10 min).
 - **Um card por atendente:** ✓ concluídos hoje e 💬 em andamento agora, com as conversas abertas e um aviso quando o cliente está aguardando resposta.
 - Todos os cards têm a **mesma altura** (`--spacing-block` no `src/index.css`). Se passar do tamanho, o card ganha rolagem interna.
-- **Filtro por equipe:** fica salvo no endereço (`?equipe=<id>`), então dá para deixar uma TV fixa numa equipe.
+- **Filtros por equipe e por usuário:** ficam salvos no endereço (`?equipe=<id>&atendente=<id>`), então sobrevivem a um recarregar. A lista de usuários mostra quem é da equipe escolhida e teve movimento hoje. Com um usuário escolhido, os números e os cards mostram só as conversas dele, mas a fila de espera continua aparecendo (quem está na fila ainda não tem atendente). Trocar de equipe limpa o filtro de usuário.
 - **Acesso só pela plataforma:** o painel abre apenas pelo botão da plataforma, para os perfis definidos em `PERFIL_MINIMO` (padrão: só administradores). Veja "Botão na plataforma" abaixo. Aberto de qualquer outro jeito, mostra "Acesso restrito".
 
 Só entram dados de **hoje** (a partir da meia-noite no fuso configurado), menos as conversas abertas, que aparecem mesmo que tenham começado ontem. A tela busca dados novos a cada **15 segundos**, e os cronômetros andam a cada segundo.
@@ -120,6 +120,7 @@ Navegador (React)  —— a cada 15 s: GET /api/snapshot ——→  backend  —
 | Tempo médio de espera | média de `timeWait` das conversas de hoje já respondidas; se vier vazio, `firstResponseAt − startAt` |
 | Cards por atendente | agrupa por `userId` da conversa; aparece quem tem conversa aberta ou atendeu hoje |
 | Filtro de equipe | conversas com `departmentId` da equipe + atendentes cadastrados nela |
+| Filtro de usuário | conversas com `userId` do usuário; "Na fila" e o card da fila continuam vindo da equipe |
 
 ## Estrutura
 
@@ -135,5 +136,5 @@ server/
   time.js      fuso / início do dia / leitura de durações
 src/
   App.tsx, hooks.ts (consulta a cada 15 s, IDs do link, relógio, filtro na URL), format.ts, types.ts
-  components/  Header (linha de cima + filtro), Board (fila + cards), AccessDenied (acesso restrito), Icons
+  components/  Header (linha de cima + filtros), FilterDropdown (dropdown dos filtros), Board (fila + cards), AccessDenied (acesso restrito), Icons
 ```

@@ -56,7 +56,8 @@ app.get('/api/snapshot', async (req, res) => {
   const auth = await authorize(credentialsFrom(req.headers), async () => raw.agents);
   if (!auth.ok) return res.status(auth.status).json({ error: auth.error, reason: auth.reason });
   const dept = typeof req.query.department === 'string' ? req.query.department : '';
-  res.json(snapshotFor(raw, dept));
+  const user = typeof req.query.user === 'string' ? req.query.user : '';
+  res.json(snapshotFor(raw, dept, user));
 });
 
 // Em produção, o mesmo servidor entrega o front já compilado (npm run build)

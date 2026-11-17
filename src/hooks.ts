@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Snapshot } from './types'
 
 /** De quantos em quantos segundos a tela busca dados novos. */
@@ -26,9 +26,9 @@ function readPlatformParams() {
 
 /**
  * Busca /api/snapshot a cada 15 s, enviando os IDs da conta e do usuário que vieram no link. Se a API falhar, mantém os últimos dados na tela e mostra o erro.
- * `department` vazio = todas as equipes.
+ * `department` / `user` vazios = sem filtro.
  */
-export function useSnapshot(department: string) {
+export function useSnapshot(department: string, user: string) {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
   const [status, setStatus] = useState<Status>('loading')
   const [error, setError] = useState<string | null>(null)
@@ -41,7 +41,11 @@ export function useSnapshot(department: string) {
 
     async function load() {
       try {
-        const url = department ? `/api/snapshot?department=${encodeURIComponent(department)}` : '/api/snapshot'
+        const q = new URLSearchParams()
+        if (department) q.set('department', department)
+        if (user) q.set('user', user)
+        const query = q.toString()
+        const url = query ? `/api/snapshot?${query}` : '/api/snapshot'
         const headers = { 'x-dash-conta': platform.conta, 'x-dash-usuario': platform.usuario }
         const res = await fetch(url, { headers, signal: controller.signal })
         if (cancelled) return
@@ -69,7 +73,7 @@ export function useSnapshot(department: string) {
       controller.abort()
       clearTimeout(timer.current)
     }
-  }, [department, platform])
+  }, [department, user, platform])
 
   return { snapshot, status, error }
 }
@@ -84,17 +88,23 @@ export function useNow(ms = 1000) {
   return now
 }
 
-/** Equipe escolhida, guardada no endereço da página (?equipe=<id>) para poder deixar uma TV fixa numa equipe. */
-export function useDepartmentParam() {
-  const [department, setDepartment] = useState(() => new URLSearchParams(window.location.search).get('equipe') ?? '')
+/**
+ * Filtro guardado no endereço da página (?equipe=<id>, ?atendente=<id>), para poder deixar
+ * uma tela fixa num filtro e para o filtro sobreviver a um recarregar.
+ */
+export function useUrlParam(key: string) {
+  const [value, setValue] = useState(() => new URLSearchParams(window.location.search).get(key) ?? '')
 
-  const change = (id: string) => {
-    const url = new URL(window.location.href)
-    if (id) url.searchParams.set('equipe', id)
-    else url.searchParams.delete('equipe')
-    window.history.replaceState(null, '', url)
-    setDepartment(id)
-  }
+  const change = useCallback(
+    (id: string) => {
+      const url = new URL(window.location.href)
+      if (id) url.searchParams.set(key, id)
+      else url.searchParams.delete(key)
+      window.history.replaceState(null, '', url)
+      setValue(id)
+    },
+    [key],
+  )
 
-  return [department, change] as const
+  return [value, change] as const
 }

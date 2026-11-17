@@ -48,3 +48,11 @@ export const FilterIcon = ({ size = 16, title }: P) => (
     <path d="M3 5h18l-7 8.5V19l-4 2v-7.5Z" />
   </svg>
 )
+
+/** Pessoa — filtro de usuário */
+export const UserIcon = ({ size = 16, title }: P) => (
+  <svg {...base(size, title)}>
+    <circle cx="12" cy="8" r="4" />
+    <path d="M4 20.5c1.4-3.6 4.4-5.5 8-5.5s6.6 1.9 8 5.5" />
+  </svg>
+)
