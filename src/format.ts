@@ -10,16 +10,23 @@ export function fmtDuration(sec: number | null | undefined): string {
   return `${r}s`
 }
 
-/** Cronômetro "mm:ss" ou "h:mm:ss" desde `iso` até `now`. */
+/**
+ * Cronômetro desde `iso` até `now`:
+ *   menos de 1h   → "mm:ss"          (07:42)
+ *   menos de 24h  → "h:mm:ss"        (3:07:42)
+ *   24h ou mais   → "Nd hh:mm:ss"    (55d 22:17:24)
+ */
 export function fmtClock(iso: string | null, now: number): string {
   if (!iso) return '—'
   const s = Math.max(0, Math.floor((now - new Date(iso).getTime()) / 1000))
-  const h = Math.floor(s / 3600)
+  const d = Math.floor(s / 86400)
+  const h = Math.floor((s % 86400) / 3600)
   const m = Math.floor((s % 3600) / 60)
   const r = s % 60
-  const mm = String(m).padStart(2, '0')
-  const ss = String(r).padStart(2, '0')
-  return h ? `${h}:${mm}:${ss}` : `${mm}:${ss}`
+  const pad = (n: number) => String(n).padStart(2, '0')
+  if (d) return `${d}d ${pad(h)}:${pad(m)}:${pad(r)}`
+  if (h) return `${h}:${pad(m)}:${pad(r)}`
+  return `${pad(m)}:${pad(r)}`
 }
 
 export const secondsSince = (iso: string | null, now: number) =>
