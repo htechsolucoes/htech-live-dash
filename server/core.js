@@ -50,8 +50,12 @@ export function snapshotFor(raw, dept = '', user = '') {
   }
 
   const team = buildSnapshot({ sessions, agents, dayStart: raw.dayStart, tz: TZ, now: raw.now });
-  // opções do filtro de usuário: quem aparece no painel da equipe (conversa aberta ou movimento hoje)
-  const users = team.agents.map((a) => ({ id: a.userId, name: a.name })).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  // opções do filtro de usuário: TODOS os usuários da conta (ou da equipe escolhida), com ou sem atendimento hoje
+  const agentName = (a) => a.shortName || a.name || 'Sem nome';
+  const users = agents
+    .filter((a) => a.userId)
+    .map((a) => ({ id: a.userId, name: agentName(a) }))
+    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
   const base = { department: dept || null, departments: departmentList(raw), user: user || null, users };
 
   if (!user) return { ...team, ...base };
@@ -64,6 +68,26 @@ export function snapshotFor(raw, dept = '', user = '') {
     now: raw.now,
   });
   const queue = team.live.filter((s) => s.status === 'PENDING');
+  // usuário escolhido sem nenhum atendimento hoje: mostra o card dele vazio, com números zerados
+  if (mine.agents.length === 0) {
+    const a = agents.find((x) => x.userId === user);
+    if (a) {
+      mine.agents = [
+        {
+          userId: a.userId,
+          name: agentName(a),
+          pictureUrl: a.pictureUrl ?? null,
+          profile: a.profile ?? null,
+          active: 0,
+          completed: 0,
+          received: 0,
+          avgServiceSec: null,
+          avgWaitSec: null,
+          lastActivityAt: null,
+        },
+      ];
+    }
+  }
   return {
     ...mine,
     ...base,
